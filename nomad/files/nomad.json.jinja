@@ -1,0 +1,2 @@
+{% from tplroot ~ "/map.jinja" import nomad as n -%}
+{{ n.config.data|json(indent=2) }}

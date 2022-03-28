@@ -1,0 +1,70 @@
+default:
+  version: 1.2.6
+  install: true
+  use_upstream: package # package, repo / binary, archive
+  user: nomad
+  group: nomad
+  root_user: root
+  root_group: root
+  bin: /usr/bin/nomad
+  service:
+    name: nomad
+    status: running
+    on_boot_state: enabled
+    reload: false
+    systemd:
+      # do not overwrite service file provided by package
+      # but override it completely
+      unit_dir: /etc/systemd/system
+  shell_completion:
+    bash:
+      install: true
+      package: bash-completion
+      dir: /etc/bash_completion.d
+  binary:
+    prereq_pkgs:
+      - unzip
+    download_remote: https://releases.hashicorp.com/nomad/
+    source_hash_remote: https://releases.hashicorp.com/nomad/
+    skip_verify: false
+    temp_dir: /tmp/nomad
+  package:
+    prereq_pkgs: []
+    pkgs_extra: []
+    pkgs:
+      - nomad
+    hold: false
+    update_holds: true
+    install_recommends: true
+  params:
+    config:
+      - /etc/nomad.d/nomad.json
+  tls:
+    self_signed: false
+    packages:
+      - openssl
+      - python3-m2crypto
+    key_file_source: tls.key
+    cert_file_source: tls.crt
+    cert_params:
+      days_valid: 3650
+      CN: {{ grains.fqdn }}
+  config:
+    source: nomad.json.jinja
+    show_changes: true
+    data:
+      data_dir: /var/lib/nomad/data
+      bind_addr: 0.0.0.0
+      server:
+        enabled: false
+      client:
+        enabled: true
+        servers:
+          - 127.0.0.1
+      log_level: INFO
+      acl:
+        enabled: false
+      telemetry: {}
+      # telemetry:
+      #   prometheus_metrics: true
+      #   disable_hostname: true
